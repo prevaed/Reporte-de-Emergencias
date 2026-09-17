@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Emergencias</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h2 {
+            color: #d9534f;
+            text-align: center;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #c9302c;
+        }
+        #mensaje {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <center><img src="prevaed.jpg"></center>
+    <h2>🚨 Reporte de Emergencias</h2>
+    <form id="emergencyForm">
+        <div class="form-group">
+            <label for="tipo">Tipo de Emergencia:</label>
+            <select id="tipo" required>
+                <option value="">Seleccione una opción</option>
+                <option value="Incendio Forestal">Incendio Forestal</option>
+                <option value="Inundación">Inundación</option>
+                <option value="Deslizamiento / Huayco">Deslizamiento / Huayco</option>
+                <option value="Sismo">Sismo</option>
+                <option value="Colapso de Estructura">Colapso de Estructura</option>
+                <option value="Vientos Fuertes">Vientos Fuertes</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="provincia">Provincia:</label>
+            <select id="provincia" required>
+                <option value="">Seleccione una opción</option>
+                <option value="Aija">Aija</option>
+                <option value="Antonio Raimondi">Antonio Raimondi</option>
+                <option value="Asunción">Asunción</option>
+                <option value="Bolognesi">Bolognesi</option>
+                <option value="Carhuaz">Carhuaz</option>
+                <option value="Carlos Fermin Fitzcarrald">Carlos Fermin Fitzcarrald</option>
+                <option value="Casma">Casma</option>
+                <option value="Corongo">Corongo</option>
+                <option value="Huaraz">Huaraz</option>
+                <option value="Huari">Huari</option>
+                <option value="Huarmey">Huarmey</option>
+                <option value="Huaylas">Huaylas</option>
+                <option value="Mariscal Luzuriaga">Mariscal Luzuriaga</option>
+                <option value="Ocros">Ocros</option>
+                <option value="Pallasca">Pallasca</option>
+                <option value="Pomabamba">Pomabamba</option>
+                <option value="Recuay">Recuay</option>
+                <option value="Santa">Santa</option>
+                <option value="Sihuas">Sihuas</option>
+                <option value="Yungay">Yungay</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="distrito">Distrito / Dirección:</label>
+            <input type="text" id="distrito" placeholder="Dirección. Av. Principal 123" required>
+        </div>
+
+        <div class="form-group">
+            <label for="descripcion">Descripción de los hechos:</label>
+            <textarea id="descripcion" rows="4" placeholder="Detalles de lo que ocurre..." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="contacto">Nombre de Contacto (Opcional):</label>
+            <input type="text" id="contacto" placeholder="Tu nombre">
+        </div>
+
+         <div class="form-group">
+            <label for="evidencia">Adjuntar Foto / Evidencia:</label>
+            <input type="file" id="evidencia" accept="image/*">
+        </div>
+
+        <button type="submit">Enviar Reporte</button>
+    </form>
+    <div id="mensaje"></div>
+</div>
+
+<script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzhaqiOnSewK6Eqa7089x0t_0Nuhqd7XSuYxWOsXbO2r60PI0xFYfB6DxFsyZLhmanQ/exec';
+
+    document.getElementById('emergencyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const mensajeDiv = document.getElementById('mensaje');
+        mensajeDiv.style.color = 'black';
+        mensajeDiv.innerText = 'Procesando y enviando reporte (esto puede tardar unos segundos)...';
+
+        const fileInput = document.getElementById('evidencia');
+        const file = fileInput.files[0];
+
+        const datos = {
+            tipo: document.getElementById('tipo').value,
+            provincia: document.getElementById('provincia').value,
+            distrito: document.getElementById('distrito').value,
+            descripcion: document.getElementById('descripcion').value,
+            contacto: document.getElementById('contacto').value || 'Anónimo',
+            archivoBase64: null,
+            nombreArchivo: null,
+            tipoArchivo: null
+        };
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                datos.archivoBase64 = reader.result;
+                datos.nombreArchivo = file.name;
+                datos.tipoArchivo = file.type;
+                enviarDatos(datos, mensajeDiv);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            enviarDatos(datos, mensajeDiv);
+        }
+    });
+
+    function enviarDatos(datos, mensajeDiv) {
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        })
+        .then(() => {
+            mensajeDiv.style.color = 'green';
+            mensajeDiv.innerText = '🚨 Reporte y evidencia enviados con éxito.';
+            document.getElementById('emergencyForm').reset();
+        })
+        .catch(error => {
+            mensajeDiv.style.color = 'red';
+            mensajeDiv.innerText = 'Error al enviar el reporte.';
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+</body>
+</html>
